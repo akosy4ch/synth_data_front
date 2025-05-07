@@ -1,24 +1,93 @@
-import logo from './logo.svg';
-import './App.css';
+import React, { useState } from "react";
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import FileUpload from "./components/FileUpload";
+import ColumnSelector from "./components/ColumnSelector";
+import ModelSelector from "./components/ModelSelector";
+import SyntheticPreview from "./components/SyntheticPreview";
+import Navbar from "./components/Navbar";
+import LoginPage from "./pages/LoginPage";
+import RegisterPage from "./pages/RegisterPage";
+import axios from "axios";
+
+const GeneratorPage = () => {
+  const [file, setFile] = useState(null);
+  const [columns, setColumns] = useState([]);
+  const [selectedColumns, setSelectedColumns] = useState([]);
+  const [models, setModels] = useState({});
+  const [syntheticData, setSyntheticData] = useState(null);
+  const [analysisResults, setAnalysisResults] = useState(null);
+  const [isLoading, setIsLoading] = useState(false); // 👈 добавили состояние загрузки
+
+  const handleGenerate = async () => {
+    setIsLoading(true); // 👈 при старте — включаем лоадер
+    const formData = new FormData();
+    formData.append("file", file);
+    selectedColumns.forEach((col) => formData.append("columns", col));
+    selectedColumns.forEach((col) => formData.append("models", models[col] || "GPT-J"));
+    formData.append("samples", 10);
+
+    try {
+      const response = await axios.post("http://172.17.111.15:8000/generate-synthetic/", formData);
+      setSyntheticData(response.data.synthetic);
+      setAnalysisResults(response.data.analysis);
+    } catch (error) {
+      console.error("Error generating synthetic data:", error);
+    } finally {
+      setIsLoading(false); // 👈 в любом случае — выключаем лоадер
+    }
+  };
+
+  return (
+    <div style={{ padding: "2rem" }}>
+      <h1>SynthData Generator</h1>
+      <FileUpload onColumnsDetected={setColumns} onFileSelected={setFile} />
+      {columns.length > 0 && (
+        <>
+          <ColumnSelector
+            columns={columns}
+            selected={selectedColumns}
+            setSelected={setSelectedColumns}
+          />
+          <ModelSelector
+            selectedColumns={selectedColumns}
+            models={models}
+            setModels={setModels}
+          />
+          <button
+            onClick={handleGenerate}
+            disabled={isLoading} // 👈 блокируем если грузится
+            style={{
+              marginTop: "1rem",
+              padding: "10px 20px",
+              fontSize: "16px",
+              cursor: isLoading ? "not-allowed" : "pointer",
+              backgroundColor: isLoading ? "#ccc" : "#4CAF50",
+              color: "white",
+              border: "none",
+              borderRadius: "5px"
+            }}
+          >
+            {isLoading ? "Generating..." : "Generate Synthetic Data"} {/* 👈 текст меняется */}
+          </button>
+        </>
+      )}
+      {syntheticData && (
+        <SyntheticPreview data={syntheticData} analysis={analysisResults} />
+      )}
+    </div>
+  );
+};
 
 function App() {
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <Router>
+      <Navbar />
+      <Routes>
+        <Route path="/" element={<GeneratorPage />} />
+        <Route path="/login" element={<LoginPage />} />
+        <Route path="/register" element={<RegisterPage />} />
+      </Routes>
+    </Router>
   );
 }
 
