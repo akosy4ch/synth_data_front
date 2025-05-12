@@ -17,9 +17,11 @@ const GeneratorPage = () => {
   const [syntheticData, setSyntheticData] = useState(null);
   const [analysisResults, setAnalysisResults] = useState(null);
   const [isLoading, setIsLoading] = useState(false); // 👈 добавили состояние загрузки
+  const [genError, setGenError] = useState(null); // 👈 добавили состояние ошибки
 
   const handleGenerate = async () => {
     setIsLoading(true); // 👈 при старте — включаем лоадер
+    setGenError(null); // 👈 сбрасываем ошибку перед началом
     const formData = new FormData();
     formData.append("file", file);
     selectedColumns.forEach((col) => formData.append("columns", col));
@@ -27,11 +29,12 @@ const GeneratorPage = () => {
     formData.append("samples", 10);
 
     try {
-      const response = await axios.post("http://172.17.111.15:8000/generate-synthetic/", formData);
+      const response = await axios.post(`${process.env.REACT_APP_API_URL}/analyze-columns/`, formData);
       setSyntheticData(response.data.synthetic);
       setAnalysisResults(response.data.analysis);
     } catch (error) {
       console.error("Error generating synthetic data:", error);
+      setGenError(error.message); // 👈 сохраняем сообщение об ошибке
     } finally {
       setIsLoading(false); // 👈 в любом случае — выключаем лоадер
     }
@@ -40,6 +43,7 @@ const GeneratorPage = () => {
   return (
     <div style={{ padding: "2rem" }}>
       <h1>SynthData Generator</h1>
+      {genError && <p className="text-red-600">{genError}</p>} {/* 👈 отображаем ошибку */}
       <FileUpload onColumnsDetected={setColumns} onFileSelected={setFile} />
       {columns.length > 0 && (
         <>

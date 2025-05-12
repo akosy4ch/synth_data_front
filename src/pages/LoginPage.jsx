@@ -15,15 +15,16 @@ export default function LoginPage() {
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
+    setError(""); // Clear error on input change
   };
 
   const handleLogin = async () => {
     try {
-      const res = await axios.post("/auth/login", formData);
-      localStorage.setItem("token", res.data.access_token); // сохраняем токен в локальное хранилище
-      navigate("/"); // после успешного логина перенаправляем на главную страницу
+      const res = await axios.post(`${process.env.REACT_APP_API_URL}/auth/login`, formData);
+      localStorage.setItem("token", res.data.access_token); // Save token to local storage
+      navigate("/"); // Redirect to home after successful login
     } catch (err) {
-      setError(err.response?.data?.detail || "Login failed");
+      setError(err.response?.data?.detail || "Login failed. Please try again.");// Set error message
     }
   };
 
@@ -49,6 +50,7 @@ export default function LoginPage() {
                     </div>
 
                     <form>
+                      {error && <div className="bg-red-100 text-red-800 p-2 mb-4">{error}</div>}
                       <p className="mb-4">Please login to your account</p>
 
                       <TEInput

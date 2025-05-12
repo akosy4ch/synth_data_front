@@ -16,14 +16,15 @@ export default function RegisterPage() {
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
+    setError(""); // Clear error on input change
   };
 
   const handleRegister = async () => {
     try {
-      await axios.post("/auth/register", formData);
-      navigate("/login"); // после успешной регистрации — на логин
+      await axios.post(`${process.env.REACT_APP_API_URL}/auth/register`, formData);
+      navigate("/login"); // Redirect to login after successful registration
     } catch (err) {
-      setError(err.response?.data?.detail || "Registration failed");
+      setError(err.message); // Set error message
     }
   };
 
@@ -49,6 +50,7 @@ export default function RegisterPage() {
                     </div>
 
                     <form>
+                      {error && <div className="bg-red-100 text-red-800 p-2 mb-4">{error}</div>}
                       <p className="mb-4">Please register an account</p>
 
                       <TEInput
