@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 
 const modelOptions = {
   text: ["GPT-J", "FLAN-T5", "MARKOV", "DISTIL-CMLM", "LLAMA-2", "DEEPSEEK"],
@@ -7,24 +7,14 @@ const modelOptions = {
 
 const heavyModels = ["GPT-J", "FLAN-T5", "LLAMA-2", "DEEPSEEK"];
 
-const ModelSelector = ({ selectedColumns, columnTypes, modelConfig, setModelConfig }) => {
+const ModelSelector = ({selectedColumns,
+  columnTypes = {}, // default to empty object
+  modelConfig,
+  setModelConfig
+}) => {
   const [isModelSupported, setIsModelSupported] = useState(true);
-  const [fetchedModelOptions, setFetchedModelOptions] = useState(modelOptions);
-
-  useEffect(() => {
-    const fetchModelOptions = async () => {
-      try {
-        // Simulate fetching model options from the backend
-        const response = await fetch("/api/model-options");
-        const data = await response.json();
-        setFetchedModelOptions(data);
-      } catch (error) {
-        console.error("Failed to fetch model options:", error);
-      }
-    };
-
-    fetchModelOptions();
-  }, []);
+  // Always use local modelOptions
+  const fetchedModelOptions = modelOptions;
 
   const handleModelChange = (col, model) => {
     setModelConfig((prev) => ({ ...prev, [col]: model }));

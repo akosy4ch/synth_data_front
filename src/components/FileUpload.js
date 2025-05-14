@@ -17,7 +17,7 @@ const FileUpload = ({ onColumnsDetected, onFileSelected }) => {
     formData.append("file", file);
 
     try {
-      const response = await axios.post("http://localhost:8000/analyze-columns/", formData);
+      const response = await axios.post(`${process.env.REACT_APP_API_URL}/analyze-columns/`,formData);
       onColumnsDetected(response.data.columns); // прокидываем в родительский компонент
     } catch (error) {
       setError(error.message); // set error message on failure

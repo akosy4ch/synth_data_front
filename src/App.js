@@ -13,7 +13,7 @@ const GeneratorPage = () => {
   const [file, setFile] = useState(null);
   const [columns, setColumns] = useState([]);
   const [selectedColumns, setSelectedColumns] = useState([]);
-  const [models, setModels] = useState({});
+  const [ models, setModels] = useState({});
   const [syntheticData, setSyntheticData] = useState(null);
   const [analysisResults, setAnalysisResults] = useState(null);
   const [isLoading, setIsLoading] = useState(false); // 👈 добавили состояние загрузки
@@ -54,8 +54,21 @@ const GeneratorPage = () => {
           />
           <ModelSelector
             selectedColumns={selectedColumns}
-            models={models}
-            setModels={setModels}
+            columnTypes={
+              Object.fromEntries(
+                columns.map(col => [
+                  col.name,
+                  // Improved mapping: recognize more numeric types
+                  [
+                    "int", "int64", "int32", "float", "float64", "float32", "number", "numeric"
+                  ].some(type => col.dtype.toLowerCase().includes(type))
+                    ? "numeric"
+                    : "text"
+                ])
+              )
+            }
+            modelConfig={models}
+            setModelConfig={setModels}
           />
           <button
             onClick={handleGenerate}
