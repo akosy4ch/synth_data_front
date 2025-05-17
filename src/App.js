@@ -1,50 +1,71 @@
 import React, { useState } from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-import FileUpload from "./components/FileUpload";
+//import FileUpload from "./components/FileUpload";
 import ColumnSelector from "./components/ColumnSelector";
 import ModelSelector from "./components/ModelSelector";
 import SyntheticPreview from "./components/SyntheticPreview";
 import Navbar from "./components/Navbar";
 import LoginPage from "./pages/LoginPage";
 import RegisterPage from "./pages/RegisterPage";
+import AnalyzeColumns from "./components/AnalyzeColumns";
+import DetectConfig from "./components/DetectConfig";
 import axios from "axios";
 
 const GeneratorPage = () => {
   const [file, setFile] = useState(null);
   const [columns, setColumns] = useState([]);
   const [selectedColumns, setSelectedColumns] = useState([]);
-  const [ models, setModels] = useState({});
+  const [models, setModels] = useState({});
   const [syntheticData, setSyntheticData] = useState(null);
   const [analysisResults, setAnalysisResults] = useState(null);
-  const [isLoading, setIsLoading] = useState(false); // 👈 добавили состояние загрузки
-  const [genError, setGenError] = useState(null); // 👈 добавили состояние ошибки
+  const [isLoading, setIsLoading] = useState(false);
+  const [genError, setGenError] = useState(null);
+  const [preserveOtherColumns, setPreserveOtherColumns] = useState(false);
 
   const handleGenerate = async () => {
-    setIsLoading(true); // 👈 при старте — включаем лоадер
-    setGenError(null); // 👈 сбрасываем ошибку перед началом
+    setIsLoading(true);
+    setGenError(null);
     const formData = new FormData();
     formData.append("file", file);
     selectedColumns.forEach((col) => formData.append("columns", col));
     selectedColumns.forEach((col) => formData.append("models", models[col] || "GPT-J"));
     formData.append("samples", 10);
+    formData.append("preserve_other_columns", preserveOtherColumns);
 
     try {
-      const response = await axios.post(`${process.env.REACT_APP_API_URL}/analyze-columns/`, formData);
+      const response = await axios.post(`${process.env.REACT_APP_API_URL}/generate-synthetic/`, formData);
       setSyntheticData(response.data.synthetic);
       setAnalysisResults(response.data.analysis);
     } catch (error) {
       console.error("Error generating synthetic data:", error);
-      setGenError(error.message); // 👈 сохраняем сообщение об ошибке
+      // Show backend error detail, message, and stack if available
+      setGenError(
+        (error.response?.data?.detail && (
+          <div>
+            <div>{error.response.data.detail}</div>
+            {error.response.data.stack && (
+              <pre style={{ color: "#a00", fontSize: "0.9em", marginTop: "0.5em" }}>
+                {error.response.data.stack}
+              </pre>
+            )}
+          </div>
+        )) ||
+        error.response?.data?.message ||
+        error.message ||
+        "Unknown error"
+      );
     } finally {
-      setIsLoading(false); // 👈 в любом случае — выключаем лоадер
+      setIsLoading(false);
     }
   };
 
   return (
     <div style={{ padding: "2rem" }}>
       <h1>SynthData Generator</h1>
-      {genError && <p className="text-red-600">{genError}</p>} {/* 👈 отображаем ошибку */}
-      <FileUpload onColumnsDetected={setColumns} onFileSelected={setFile} />
+
+      <AnalyzeColumns setColumns={setColumns} setFile={setFile} />
+      <DetectConfig file={file} setModels={setModels} setColumns={setColumns} />
+
       {columns.length > 0 && (
         <>
           <ColumnSelector
@@ -54,25 +75,36 @@ const GeneratorPage = () => {
           />
           <ModelSelector
             selectedColumns={selectedColumns}
-            columnTypes={
-              Object.fromEntries(
-                columns.map(col => [
-                  col.name,
-                  // Improved mapping: recognize more numeric types
+            columnTypes={Object.fromEntries(
+              columns.map(col => [
+                col.name,
+                (
+                  col.dtype &&
                   [
                     "int", "int64", "int32", "float", "float64", "float32", "number", "numeric"
                   ].some(type => col.dtype.toLowerCase().includes(type))
-                    ? "numeric"
-                    : "text"
-                ])
-              )
-            }
+                )
+                  ? "numeric"
+                  : "text"
+              ])
+            )}
             modelConfig={models}
             setModelConfig={setModels}
           />
+          <div style={{ marginTop: "1rem" }}>
+            <label>
+              <input
+                type="checkbox"
+                checked={preserveOtherColumns}
+                onChange={e => setPreserveOtherColumns(e.target.checked)}
+                style={{ marginRight: "0.5rem" }}
+              />
+              Preserve other columns
+            </label>
+          </div>
           <button
             onClick={handleGenerate}
-            disabled={isLoading} // 👈 блокируем если грузится
+            disabled={isLoading}
             style={{
               marginTop: "1rem",
               padding: "10px 20px",
@@ -84,10 +116,17 @@ const GeneratorPage = () => {
               borderRadius: "5px"
             }}
           >
-            {isLoading ? "Generating..." : "Generate Synthetic Data"} {/* 👈 текст меняется */}
+            {isLoading ? "Generating..." : "Generate Synthetic Data"}
           </button>
         </>
       )}
+
+      {genError && (
+        <div style={{ color: "red", marginTop: "1rem" }}>
+          {typeof genError === "string" ? genError : genError}
+        </div>
+      )}
+
       {syntheticData && (
         <SyntheticPreview data={syntheticData} analysis={analysisResults} />
       )}
@@ -95,17 +134,19 @@ const GeneratorPage = () => {
   );
 };
 
-function App() {
+const App = () => {
   return (
-    <Router>
-      <Navbar />
-      <Routes>
-        <Route path="/" element={<GeneratorPage />} />
-        <Route path="/login" element={<LoginPage />} />
-        <Route path="/register" element={<RegisterPage />} />
-      </Routes>
-    </Router>
+    <div>
+      <Router>
+        <Navbar />
+        <Routes>
+          <Route path="/" element={<GeneratorPage />} />
+          <Route path="/login" element={<LoginPage />} />
+          <Route path="/register" element={<RegisterPage />} />
+        </Routes>
+      </Router>
+    </div>
   );
-}
+};
 
 export default App;
