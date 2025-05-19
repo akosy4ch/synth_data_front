@@ -1,30 +1,30 @@
+
 import React, { useState } from "react";
 import { TEInput, TERipple } from "tw-elements-react";
 import { useNavigate } from "react-router-dom";
-import axios from "axios";
+import { loginUser } from "../api/authApi";
 
 export default function LoginPage() {
   const navigate = useNavigate();
-
   const [formData, setFormData] = useState({
     username: "",
     password: "",
   });
-
   const [error, setError] = useState("");
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
-    setError(""); // Clear error on input change
+    setError("");
   };
 
   const handleLogin = async () => {
     try {
-      const res = await axios.post(`${process.env.REACT_APP_API_URL}/auth/login`, formData);
-      localStorage.setItem("token", res.data.access_token); // Save token to local storage
-      navigate("/"); // Redirect to home after successful login
+
+      await loginUser(formData);
+      navigate("/"); // перенаправляем на главную
     } catch (err) {
-      setError(err.response?.data?.detail || "Login failed. Please try again.");// Set error message
+
+      setError(err.message || "Login failed. Please try again.");
     }
   };
 
@@ -41,7 +41,7 @@ export default function LoginPage() {
                     <div className="text-center">
                       <img
                         className="mx-auto w-48"
-                        src="https://tecdn.b-cdn.net/img/Photos/new-templates/bootstrap-login-form/lotus.webp"
+                        src="/logo.png"
                         alt="logo"
                       />
                       <h4 className="mb-12 mt-1 pb-1 text-xl font-semibold">
@@ -78,8 +78,8 @@ export default function LoginPage() {
                           <button
                             className="w-full rounded px-6 pb-2 pt-2.5 text-xs font-medium uppercase text-white shadow transition duration-150 ease-in-out"
                             type="button"
-                            style={{
-                              background: "linear-gradient(to right, #ee7724, #d8363a, #dd3675, #b44593)",
+                             style={{
+                              background: "linear-gradient(to right, #00F260 ,#45a247,#2b5876, #283c86)",
                             }}
                             onClick={handleLogin}
                           >
@@ -106,7 +106,7 @@ export default function LoginPage() {
                 <div
                   className="flex items-center rounded-b-lg lg:w-6/12 lg:rounded-r-lg"
                   style={{
-                    background: "linear-gradient(to right, #ee7724, #d8363a, #dd3675, #b44593)",
+                    background: "linear-gradient(to right, #283c86, #2b5876, #45a247, #00F260)",
                   }}
                 >
                   <div className="px-4 py-6 text-white md:px-12">

@@ -1,7 +1,8 @@
 import React, { useState } from "react";
 import { TEInput, TERipple } from "tw-elements-react";
 import { useNavigate } from "react-router-dom";
-import axios from "axios";
+import { registerUser } from "../api/authApi";
+
 
 export default function RegisterPage() {
   const navigate = useNavigate();
@@ -19,14 +20,14 @@ export default function RegisterPage() {
     setError(""); // Clear error on input change
   };
 
-  const handleRegister = async () => {
-    try {
-      await axios.post(`${process.env.REACT_APP_API_URL}/auth/register`, formData);
-      navigate("/login"); // Redirect to login after successful registration
-    } catch (err) {
-      setError(err.message); // Set error message
-    }
-  };
+   const handleRegister = async () => {
+     try {
+       await registerUser(formData);
+       navigate("/login"); // После успешной регистрации — на страницу логина
+     } catch (err) {
+       setError(err.response?.data?.detail || err.message || "Registration failed");
+     }
+   };
 
   return (
     <section className="h-full bg-neutral-200 dark:bg-neutral-700">
@@ -41,7 +42,7 @@ export default function RegisterPage() {
                     <div className="text-center">
                       <img
                         className="mx-auto w-48"
-                        src="https://tecdn.b-cdn.net/img/Photos/new-templates/bootstrap-login-form/lotus.webp"
+                        src="/logo.png"
                         alt="logo"
                       />
                       <h4 className="mb-12 mt-1 pb-1 text-xl font-semibold">
@@ -88,7 +89,7 @@ export default function RegisterPage() {
                             className="w-full rounded px-6 pb-2 pt-2.5 text-xs font-medium uppercase text-white shadow transition duration-150 ease-in-out"
                             type="button"
                             style={{
-                              background: "linear-gradient(to right, #ee7724, #d8363a, #dd3675, #b44593)",
+                              background: "linear-gradient(to right, #00F260 ,#45a247,#2b5876, #283c86)",
                             }}
                             onClick={handleRegister}
                           >
@@ -115,7 +116,7 @@ export default function RegisterPage() {
                 <div
                   className="flex items-center rounded-b-lg lg:w-6/12 lg:rounded-r-lg"
                   style={{
-                    background: "linear-gradient(to right, #ee7724, #d8363a, #dd3675, #b44593)",
+                    background: "linear-gradient(to right, #283c86, #2b5876, #45a247, #00F260)",
                   }}
                 >
                   <div className="px-4 py-6 text-white md:px-12">

@@ -10,18 +10,21 @@ const ColumnSelector = ({ columns, selected, setSelected }) => {
   };
 
   return (
-    <div style={{ marginTop: "2rem" }}>
-      <h3>Select Columns to Generate</h3>
-      <ul style={{ listStyle: "none", paddingLeft: 0 }}>
+    <div className="my-6">
+      <h3 className="text-lg font-semibold mb-2 text-gray-800">Select Columns to Generate</h3>
+      <ul className="space-y-2">
         {columns.map((col) => (
           <li key={col.name}>
-            <label>
+            <label className="inline-flex items-center">
               <input
                 type="checkbox"
                 checked={selected.includes(col.name)}
                 onChange={() => toggleColumn(col.name)}
+                className="mr-2"
               />
-              <strong> {col.name} </strong> — {col.dtype}, {col.unique_values} unique
+              <span>
+                <strong>{col.name}</strong> — {col.dtype}, {col.unique_values} unique
+              </span>
             </label>
           </li>
         ))}

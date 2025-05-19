@@ -1,22 +1,16 @@
 // src/api/authApi.js
-import axios from "axios";
+import api from "./api";
 
-// ← your new ngrok URL here:
-const API_URL = "http://localhost:8000/auth";
+// базовый путь для всех auth-запросов
+const AUTH_PREFIX = "/auth";
 
 export const registerUser = async (credentials) => {
-  try {
-    await axios.post(`${API_URL}/register`, credentials);
-  } catch (err) {
-    throw new Error(err.response?.data?.message || "Registration failed");
-  }
+  // у interceptor’а нет токена, он его и не вставит
+  return api.post(`${AUTH_PREFIX}/register`, credentials);
 };
 
 export const loginUser = async (credentials) => {
-  try {
-    const res = await axios.post(`${API_URL}/login`, credentials);
-    localStorage.setItem("token", res.data.access_token);
-  } catch (err) {
-    throw new Error(err.response?.data?.message || "Login failed");
-  }
+  const res = await api.post(`${AUTH_PREFIX}/login`, credentials);
+  localStorage.setItem("token", res.data.access_token);
+  return res;
 };

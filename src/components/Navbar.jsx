@@ -1,4 +1,5 @@
 import React from "react";
+
 import { Link, useNavigate } from "react-router-dom";
 
 const Navbar = () => {
@@ -6,63 +7,48 @@ const Navbar = () => {
   const isLoggedIn = !!localStorage.getItem("token");
 
   const handleLogout = () => {
-    localStorage.removeItem("token"); // Очищаем токен
-    navigate("/login"); // Переходим на страницу логина
+    localStorage.removeItem("token");
+    navigate("/login");
   };
 
   return (
-    <nav style={{
-      display: "flex",
-      justifyContent: "space-between",
-      alignItems: "center",
-      backgroundColor: "#4CAF50",
-      padding: "1rem",
-      color: "white"
-    }}>
-      <Link
-        to="/"
-        style={{
-          textDecoration: "none",
-          color: "white",
-          fontSize: "20px",
-          fontWeight: "bold"
-        }}
-      >
-        SynthData Generator
-      </Link>
+    <nav className="bg-gradient-to-r from-[#00F260] via-[#45a247] via-[#2b5876] to-[#283c86] text-white shadow-md">
+      <div className="container mx-auto flex justify-between items-center py-4 px-6">
+        <Link
+          to="/"
+          className="text-2xl font-bold tracking-wide hover:opacity-90 transition"
+        >
+          SynthData Generator
+        </Link>
 
-      <div>
-        {!isLoggedIn ? (
-          <>
-            <Link
-              to="/login"
-              style={{ marginRight: "1rem", textDecoration: "none", color: "white" }}
-            >
-              Login
-            </Link>
-            <Link
-              to="/register"
-              style={{ textDecoration: "none", color: "white" }}
-            >
-              Register
-            </Link>
-          </>
-        ) : (
-          <button
-            onClick={handleLogout}
-            style={{
-              backgroundColor: "transparent",
-              border: "1px solid white",
-              borderRadius: "5px",
-              padding: "0.5rem 1rem",
-              color: "white",
-              cursor: "pointer",
-              fontSize: "16px"
-            }}
+        <div className="space-x-4 text-sm font-medium">
+          {!isLoggedIn ? (
+            <>
+              <Link to="/login" className="hover:underline hover:opacity-90 transition">Login</Link>
+              <Link to="/register" className="hover:underline hover:opacity-90 transition">Register</Link>
+            </>
+          ) : (
+            <>
+              <Link to="/my-files" className="hover:underline hover:opacity-90 transition">
+                📁 My Files
+              </Link>
+              <button
+                onClick={handleLogout}
+                className="bg-transparent border border-white rounded px-4 py-2 hover:bg-white hover:text-[#2b5876] transition duration-200"
+              >
+                Logout
+              </button>
+            </>
+          )}
+
+          <Link
+            to="/evaluate"
+            className="hover:underline hover:opacity-90 transition"
           >
-            Logout
-          </button>
-        )}
+            🧪 Evaluate Texts
+          </Link>
+        </div>
+
       </div>
     </nav>
   );
