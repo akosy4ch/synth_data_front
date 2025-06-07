@@ -1,29 +1,29 @@
 import React, { useState } from "react";
 
 const modelOptions = {
-  text: ["GPT-J", "FLAN-T5", "MARKOV", "DISTIL-CMLM", "LLAMA-2", "DEEPSEEK"],
+  text: ["GPT-J", "FLAN-T5", "MARKOV", "DISTIL-CMLM", "LLAMA-3.2", "DEEPSEEK","OpenELM"],
   numeric: ["CTGAN", "TVAE", "GMM"],
 };
 
-const heavyModels = ["GPT-J", "FLAN-T5", "LLAMA-2", "DEEPSEEK"];
+const heavyModels = ["GPT-J", "FLAN-T5", "LLAMA-3.2", "DEEPSEEK"];
 
-const ModelSelector = ({selectedColumns,
-  columnTypes = {}, // default to empty object
+const ModelSelector = ({
+  selectedColumns,
+  columnTypes = {},
   modelConfig,
   setModelConfig
 }) => {
-  const [isModelSupported, setIsModelSupported] = useState(true);
-  // Always use local modelOptions
+  const [modelSupportStatus, setModelSupportStatus] = useState({});
+
   const fetchedModelOptions = modelOptions;
 
   const handleModelChange = (col, model) => {
     setModelConfig((prev) => ({ ...prev, [col]: model }));
-    // Simulate backend validation for model support
+
     const supported = fetchedModelOptions[columnTypes[col] || "text"]?.includes(model);
-    setIsModelSupported(supported);
+    setModelSupportStatus((prev) => ({ ...prev, [col]: supported }));
   };
 
-  // Функция для отображения модели с ⚡ если тяжёлая
   const getDisplayName = (model) => {
     return heavyModels.includes(model) ? `${model} ⚡` : model;
   };
@@ -34,6 +34,7 @@ const ModelSelector = ({selectedColumns,
       {Array.isArray(selectedColumns) && selectedColumns.map((col) => {
         const type = columnTypes?.[col] || "text"; 
         const selectedModel = modelConfig[col] || "";
+        const isSupported = modelSupportStatus[col] ?? true;
 
         return (
           <div key={col} style={{ marginBottom: "2rem" }}>
@@ -53,7 +54,6 @@ const ModelSelector = ({selectedColumns,
               </select>
             </div>
 
-            {/* Алерт если выбрана тяжёлая модель */}
             {heavyModels.includes(selectedModel) && (
               <div className="mt-2 p-3 rounded bg-yellow-100 text-yellow-800 text-sm border border-yellow-400">
                 ⚠️ The selected model (<strong>{selectedModel}</strong>) requires a powerful GPU.<br />
@@ -61,8 +61,7 @@ const ModelSelector = ({selectedColumns,
               </div>
             )}
 
-            {/* Предупреждение если модель не поддерживается */}
-            {!isModelSupported && (
+            {!isSupported && (
               <p className="text-red-600">That model isn’t supported for this column.</p>
             )}
           </div>

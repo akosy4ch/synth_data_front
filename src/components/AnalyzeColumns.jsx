@@ -1,16 +1,20 @@
 import React, { useState } from "react";
 import { analyzeColumns } from "../api/dataApi";
+import useGeneratorStore from "../components/state_store";
 
+const AnalyzeColumns = () => {
+  const analysisResult = useGeneratorStore((s) => s.analysisMetadata);
+  const setAnalysisResult = useGeneratorStore((s) => s.setAnalysisMetadata);
+  const setColumns = useGeneratorStore((s) => s.setColumns);
+  const setFile = useGeneratorStore((s) => s.setFile);
 
-const AnalyzeColumns = ({ setColumns, setFile }) => {
-  const [selectedFile, setSelectedFile] = useState(null);
-  const [analysisResult, setAnalysisResult] = useState(null);
+  const [selectedFile, setSelectedFile] = useState(null); // ✅ required
   const [error, setError] = useState("");
 
   const handleFileChange = (e) => {
     const file = e.target.files[0];
     setSelectedFile(file);
-    setFile(file);
+    setFile(file); // optional — you can persist just file name
     setAnalysisResult(null);
     setError("");
   };
@@ -22,15 +26,15 @@ const AnalyzeColumns = ({ setColumns, setFile }) => {
     setError("");
     try {
       const res = await analyzeColumns(selectedFile);
-      setAnalysisResult(res.data);
-      setColumns(res.data.columns);
+      setAnalysisResult(res.data); // persist full analysis
+      setColumns(res.data.columns); // for downstream use
     } catch (err) {
       console.error("Column analysis failed", err);
-      if (err.response?.status === 401) {
-        setError("You must be logged in to analyze columns.");
-      } else {
-        setError("Column analysis failed. Please try again.");
-      }
+      setError(
+        err.response?.status === 401
+          ? "You must be logged in to analyze columns."
+          : "Column analysis failed. Please try again."
+      );
     }
   };
 

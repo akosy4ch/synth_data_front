@@ -8,8 +8,15 @@ const DetectConfig = ({ file, setModels, setColumns }) => {
     const formData = new FormData();
     formData.append("file", file);
     try {
-      const response = await axios.post(`${process.env.REACT_APP_API_URL}/detect-best-config/`, formData);
-      setRecommendations(response.data.recommendations);
+      const response = await axios.post(`${process.env.REACT_APP_API_URL}/detect-best-config/`,   formData,
+      {
+        headers: {
+          "Content-Type": "multipart/form-data",
+          "Authorization": `Bearer ${localStorage.getItem("token")}`
+        }
+      }
+    );
+      setRecommendations(response.data.recommendations|| []);
       if (response.data.columns) {
         setColumns(response.data.columns);
       }

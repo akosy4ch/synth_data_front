@@ -39,18 +39,24 @@ const MyFilesList = () => {
         <div>
           <h3 className="text-lg font-medium mb-2">📄 Original Datasets</h3>
           <ul className="list-disc list-inside">
-            {originals.map((path, i) => (
-              <li key={i} className="text-sm text-gray-700">{path}</li>
-            ))}
+          {originals.map((f, i) => (
+            <li key={i} className="text-sm text-gray-700">
+              📄 {f.filename} <br />
+              <span className="text-xs text-gray-500">{f.s3_path}</span>
+            </li>
+          ))}
           </ul>
         </div>
 
         <div>
           <h3 className="text-lg font-medium mb-2">🤖 Synthetic Datasets</h3>
-          <ul className="list-disc list-inside">
-            {synthetics.map((path, i) => (
-              <li key={i} className="text-sm text-gray-700">{path}</li>
-            ))}
+        <ul className="list-disc list-inside">
+         {synthetics.map((f, i) => (
+          <li key={i} className="text-sm text-gray-700">
+          🤖 {f.filename} <br />
+           <span className="text-xs text-gray-500">{f.s3_path}</span>
+          </li>
+         ))}
           </ul>
         </div>
       </div>

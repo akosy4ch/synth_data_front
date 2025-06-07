@@ -2,10 +2,9 @@
 import axios from "axios";
 
 const api = axios.create({
-  baseURL: process.env.REACT_APP_API_URL, // например http://localhost:8000
+  baseURL: process.env.REACT_APP_API_URL,// 20s timeout
 });
 
-// Перед каждым запросом ставим заголовок Authorization, если токен есть
 api.interceptors.request.use(config => {
   const token = localStorage.getItem("token");
   if (token) {
@@ -14,5 +13,16 @@ api.interceptors.request.use(config => {
   }
   return config;
 });
+
+api.interceptors.response.use(
+  response => response,
+  error => {
+    console.error("❌ API Error:", error);
+    if (error.response) {
+      console.error("🔍 Response data:", error.response.data);
+    }
+    return Promise.reject(error);
+  }
+);
 
 export default api;
